@@ -28,8 +28,8 @@ class ConnectFour:
     #         self.repr = repr
 
     # Grid settings
-    ROWS        = 7
-    COLUMNS     = 6
+    ROWS        = 6
+    COLUMNS     = 7
     SPACING     = '  '  # '  ' if os.name == 'nt' else ' '
     
     # Terminal color codes to modify text output
@@ -53,9 +53,9 @@ class ConnectFour:
 
     def __init__(self):
         self.__grid       = [
-            [self.__SLOT for _ in range(self.ROWS)] for _ in range(self.COLUMNS)
+            [self.__SLOT for _ in range(self.COLUMNS)] for _ in range(self.ROWS)
         ]
-        self.__LABELS      = [f'{self.__WHITE}{i+1}' for i in range(self.COLUMNS+1)]
+        self.__LABELS      = [f'{self.__WHITE}{i+1}' for i in range(self.COLUMNS)]
         self.PLAYER1       = self.Player("Red"   , self.R_DISC)
         self.PLAYER2       = self.Player("Yellow", self.Y_DISC)
         self.__running     = False
@@ -74,9 +74,10 @@ class ConnectFour:
     
     def __slot_available(self, column):
         row = self.__free_slots[column]
-        return row <= self.COLUMNS-1
+        return row < self.ROWS
     
     def __drop_disc(self, column, row):
+        print(row, column)
         self.__grid[row][column] = self.__current_player.disc
         self.__free_slots[column] += 1
 
@@ -85,23 +86,23 @@ class ConnectFour:
         
         horizontal = ('{}'*self.ROWS).format(*self.__grid[row]).find(goal)
         
-        items = [self.__grid[i][column] for i in range(self.COLUMNS)]
-        vertical   = ('{}'*self.COLUMNS).format(*items).find(goal)
+        items = [self.__grid[i][column] for i in range(self.ROWS)]
+        vertical   = ('{}'*self.ROWS).format(*items).find(goal)
 
         c_d = row + column
-        descending = ''.join([self.__grid[i][-i+c_d] for i in range(self.COLUMNS) \
-                      if 0 <= -i+c_d < self.ROWS]).find(goal)
+        descending = ''.join([self.__grid[i][-i+c_d] for i in range(self.ROWS) \
+                      if 0 <= -i+c_d < self.COLUMNS]).find(goal)
         
         c_a = column - row
-        ascending  = ''.join([self.__grid[i][i+c_a] for i in range(self.COLUMNS) \
-                      if 0 <= i+c_a < self.ROWS]).find(goal)
+        ascending  = ''.join([self.__grid[i][i+c_a] for i in range(self.ROWS) \
+                      if 0 <= i+c_a < self.COLUMNS]).find(goal)
         
         if horizontal > -1 or vertical > -1 or descending > -1 or ascending > -1:
             id, disc = self.__current_player.id, self.__current_player.disc
             self.__end_game(f"{disc} {id} won the game! {disc}")
     
     def __full_grid(self):
-        return sum(map((self.ROWS-1).__le__, self.__free_slots.values()))==self.ROWS
+        return sum(map((self.ROWS).__le__, self.__free_slots.values()))==self.COLUMNS
     
     def __switch_player(self):
         self.__current_player, self.__next_player = \
